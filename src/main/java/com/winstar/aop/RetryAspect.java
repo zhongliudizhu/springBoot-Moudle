@@ -4,42 +4,48 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
 
 import java.lang.reflect.Method;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @Aspect
 @Slf4j
 public class RetryAspect {
 
-    AtomicInteger retryNum = new AtomicInteger(1);
 
-    @Around("@annotation(retryable)")
-    public Object doAround(ProceedingJoinPoint joinPoint, BinRetryable retryable) throws Throwable {
-        Object obj = null;
+    @Pointcut("@annotation(com.winstar.aop.BinRetryable)")
+    public void annotationPointcut() {
+    }
+
+    @Around("annotationPointcut()")
+    public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
+
         log.info("进入增强&& target=" + joinPoint.getTarget());
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
-        Class<? extends Exception> value = retryable.value();
-        int num = retryable.maxAttempts();
-        if (ObjectUtils.isEmpty(value)) {
+        Class<? extends Exception> clazz = method.getAnnotation(BinRetryable.class).value();
+        int num = method.getAnnotation(BinRetryable.class).maxAttempts();
+        if (num <= 1) {
             return joinPoint.proceed();
         }
-        while (retryNum.get() <= num) {
+        int retryNum = 0;
+        while (retryNum <= num) {
             try {
-                obj = joinPoint.proceed();
-                return obj;
+                retryNum++;
+                log.info("====进行第" + retryNum + "次调用====");
+                return joinPoint.proceed();
             } catch (Exception e) {
-                retryNum.incrementAndGet();
+                if (retryNum >= num || !e.getClass().isAssignableFrom(clazz)) {
+                    throw e;
+                }
                 Thread.sleep(200);
             }
         }
 
-        return obj;
+        return null;
     }
 
 

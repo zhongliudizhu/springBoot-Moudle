@@ -23,14 +23,10 @@ public class RetryService {
     @Autowired
     RestTemplate restTemplate;
 
-    AtomicInteger num = new AtomicInteger(1);
 
     //@Retryable(value = {Exception.class}, maxAttempts = 4,backoff = @Backoff(delay = 2000L, multiplier = 1.5))
     @BinRetryable(value = Exception.class, maxAttempts = 3)
     public Map doRetry() {
-        if (num.get() > 1) {
-            log.info("===进行第" + (num.get() - 1) + "次重试操作====");
-        }
         Map<String, String> paramMap = new HashMap<>();
         paramMap.put("templateId", "4028f69c6b1add64016b207b9a3d004f");
         paramMap.put("num", "5");
@@ -38,7 +34,6 @@ public class RetryService {
         try {
             responseEntity = restTemplate.getForEntity(url + SignUtil.getParameters(paramMap), Map.class);
         } catch (Exception e) {
-            num.incrementAndGet();
             throw e;
         }
         if (!ObjectUtils.isEmpty(responseEntity)) {
