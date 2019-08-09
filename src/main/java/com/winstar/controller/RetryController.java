@@ -1,5 +1,6 @@
 package com.winstar.controller;
 
+import com.winstar.common.Result;
 import com.winstar.service.RetryService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,9 +17,10 @@ public class RetryController {
     RetryService retryService;
 
     @GetMapping("/doRetry")
-    public Map doRetry() {
+    public Result doRetry() {
         Map map = retryService.doRetry();
-        return map;
+        return Result.success(map);
     }
+
 
 }
