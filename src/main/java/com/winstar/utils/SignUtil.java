@@ -18,12 +18,10 @@ public class SignUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(SignUtil.class);
 
-    public static String merchant = "61045834521";
-    private static String secret = "6abab93252ea1a93c6c36a4585075da1b7116c6cdc0dccc8c8fe14e633289305";
 
-    public static String sign(Map<String, String> parameters) {
+    public static String sign(Map<String, Object> parameters, String secret) {
         StringBuilder param = new StringBuilder();
-        TreeMap<String, String> map = new TreeMap<>(parameters);
+        TreeMap<String, Object> map = new TreeMap<>(parameters);
         Set es = map.entrySet();
         for (Object e : es) {
             Map.Entry entry = (Map.Entry) e;
@@ -38,9 +36,9 @@ public class SignUtil {
         return encodeMd5(param.toString().getBytes());
     }
 
-    public static String getParameters(Map<String, String> parameters) {
+    public static String getParameters(Map<String, Object> parameters, String secret) {
         StringBuilder param = new StringBuilder();
-        TreeMap<String, String> map = new TreeMap<>(parameters);
+        TreeMap<String, Object> map = new TreeMap<>(parameters);
         Set es = map.entrySet();
         for (Object e : es) {
             Map.Entry entry = (Map.Entry) e;
@@ -49,14 +47,14 @@ public class SignUtil {
                 param.append((String) entry.getKey()).append("=").append(value).append("&");
             }
         }
-        param.append("sign=").append(sign(parameters));
+        param.append("sign=").append(sign(parameters, secret));
         return param.toString();
     }
 
-    public static boolean checkSign(Map<String, String> parameters) {
-        String sign = parameters.get("sign");
+    public static boolean checkSign(Map<String, Object> parameters, String secret) {
+        String sign = parameters.get("sign").toString();
         parameters.remove("sign");
-        return sign.equals(sign(parameters));
+        return sign.equals(sign(parameters, secret));
     }
 
     private static String encodeMd5(byte[] source) {

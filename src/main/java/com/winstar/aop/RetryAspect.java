@@ -22,7 +22,6 @@ public class RetryAspect {
 
     @Around("annotationPointcut()")
     public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
-
         log.info("进入增强&& target=" + joinPoint.getTarget());
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();

@@ -25,13 +25,13 @@ public class RetryService {
     @Retryable(value = {Exception.class}, maxAttempts = 4, backoff = @Backoff(delay = 2000L, multiplier = 1.5))
     // @BinRetryable(value = Exception.class, maxAttempts = 3)
     public Map doRetry() {
-        Map<String, String> paramMap = new HashMap<>();
+        Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("templateId", "4028f69c6b1add64016b207b9a3d004f");
         paramMap.put("num", "5");
-        paramMap.put("merchant", SignUtil.merchant);
+        paramMap.put("merchant", "");
         ResponseEntity<Map> responseEntity;
         try {
-            responseEntity = restTemplate.getForEntity(url + SignUtil.getParameters(paramMap), Map.class);
+            responseEntity = restTemplate.getForEntity(url + SignUtil.getParameters(paramMap, ""), Map.class);
         } catch (Exception e) {
             throw e;
         }

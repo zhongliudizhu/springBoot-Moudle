@@ -1,6 +1,9 @@
-local key1=KEYS[1]
-local key2=KEYS[2]
-local key3=KEYS[3]
-  redis.call("set",key1,key2)
-  redis.call("expire",key1,key3)
-  return true
+
+local current=redis.call('setNX',keys[1],ARGV[1])
+if current == 1 then
+   redis.call('expire', KEYS[1], ARGV[2],ARGV[3])
+   return true
+end
+return false
+
+
