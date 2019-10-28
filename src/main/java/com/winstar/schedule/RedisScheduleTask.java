@@ -35,7 +35,6 @@ public class RedisScheduleTask {
         this.goodsRepository = goodsRepository;
     }
 
-    @Scheduled(cron = "0 */2 * * * ?")
     public void writeToRedis() {
         List<Goods> goodsList = goodsRepository.findAll(new Sort(Sort.Direction.DESC, "createTime"));
         if (CollectionUtils.isEmpty(goodsList)) {
