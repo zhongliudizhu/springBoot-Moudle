@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SetOperations;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -38,6 +39,8 @@ public class RetryController {
     CustomerRepository customerRepository;
     private static final String envelop_pool = "envelop_";
     private static final String has_take_prefix = "has_take";
+    private static final String envelop_record = "envelop_record";
+
     AlipayClient alipayClient;
 
     @GetMapping("/doRetry")
@@ -103,6 +106,7 @@ public class RetryController {
         //控制超抢问题
         ListOperations listOperations = redisTemplate.opsForList();
         SetOperations setOperations = redisTemplate.opsForSet();
+        ZSetOperations zSetOperations = redisTemplate.opsForZSet();
         if (setOperations.add(has_take_prefix, receiveAccountId) != 1) {
             return Result.fail("receive_failed", "无法重复领取");
         }
@@ -111,13 +115,21 @@ public class RetryController {
             log.info("红包已抢完，无法领取");
             return Result.fail("red_empty", "红包已抢完，无法领取");
         }
-        // setOperations.add();
         //展示每个人个领了多钱
         Map<String, Object> data = new HashMap<>();
         data.put("accountId", receiveAccountId);
         data.put("money", value);
+        zSetOperations.add(envelop_record, receiveAccountId, Double.valueOf(value.toString()));
         return Result.success(data);
     }
+
+    @GetMapping("/getEnvelopInfo")
+    public Result getEnvelopInfo() {
+        ZSetOperations zSetOperations = redisTemplate.opsForZSet();
+        Set set = zSetOperations.reverseRangeWithScores(envelop_record + "dd", 0, -1);
+        return Result.success(set);
+    }
+
 
     @PostMapping("/executeAliPay")
     public String executeAliPay(String orderNum, String totalMoney) {

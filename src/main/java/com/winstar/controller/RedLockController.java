@@ -75,7 +75,6 @@ public class RedLockController {
             }
         }
 
-
         return new Result();
     }
 

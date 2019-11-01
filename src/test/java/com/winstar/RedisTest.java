@@ -17,9 +17,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import javax.annotation.PostConstruct;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @SpringBootTest
@@ -41,9 +39,12 @@ public class RedisTest {
             redisTemplate.delete(key);
         }
         List<Customer> customerList = customerRepository.findAll(new PageRequest(1, 10, Sort.Direction.DESC, "createdAt")).getContent();
-        for (Customer customer : customerList) {
-            redisTemplate.opsForSet().add(key, customer);
-        }
+        Map<String, List<Customer>> customerMap = new HashMap<>();
+        List<Customer> midList = new ArrayList<>();
+        customerList.stream().filter(c -> c.getCityNumber().startsWith("dd")).forEach(c -> {
+            midList.add(c);
+            customerMap.put(c.getCityNumber(), midList);
+        });
     }
 
     @Test
