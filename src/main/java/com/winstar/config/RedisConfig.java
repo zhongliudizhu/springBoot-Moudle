@@ -30,7 +30,7 @@ public class RedisConfig {
 
         jackson2JsonRedisSerializer.setObjectMapper(om);
 
-        RedisTemplate<String, Object> template = new RedisTemplate();
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
 
         template.setConnectionFactory(connectionFactory);
 

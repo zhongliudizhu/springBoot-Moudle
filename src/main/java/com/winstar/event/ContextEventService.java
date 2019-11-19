@@ -12,8 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ContextEventService {
 
-    @Async
-    @EventListener(value = {ContextRefreshedEvent.class})
+
     public void showEvent(Object source) {
         log.info("{Thread} thread==" + Thread.currentThread().getName());
         log.info("{source}事件源" + source);
